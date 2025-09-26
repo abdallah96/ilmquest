@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import RoomLobby from "@/components/RoomLobby";
@@ -17,7 +17,7 @@ export default function RoomPage() {
 
   const [username, setUsername] = useState("");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
-  const [connecting, setConnecting] = useState(true);
+  // removed unused connecting state
 
   useEffect(() => {
     try {
@@ -48,7 +48,7 @@ export default function RoomPage() {
     s.on("room:error", onError);
     s.emit("room:join", { code, name: username });
     s.emit("room:snapshot", { code });
-    setConnecting(false);
+    // socket ready
     return () => {
       s.off("room:update", onUpdate);
       s.off("room:error", onError);

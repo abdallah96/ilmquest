@@ -67,8 +67,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponseServerI
 
       socket.on("room:answer", ({ code, optionIndex }: { code: string; optionIndex: number }) => {
         const result = roomStore.submitAnswer(code, socket.id, optionIndex);
-        if (!("ok" in result) || !result.ok) {
-          socket.emit("room:error", (result as any).reason ?? "not-active");
+        if (!result.ok) {
+          socket.emit("room:error", result.reason);
           return;
         }
         io.to(code).emit("room:update", result.snapshot);

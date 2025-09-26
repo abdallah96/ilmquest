@@ -48,7 +48,7 @@ export default function Home() {
     <main className="mx-auto max-w-md w-full px-4 py-10 sm:py-12">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-rose-700">IlmQuest</h1>
-        <p className="text-sm text-rose-700/80 mt-1">Quiz islamique multijoueur – mobile d'abord</p>
+        <p className="text-sm text-rose-700/80 mt-1">Quiz islamique multijoueur – mobile d&apos;abord</p>
       </div>
 
       <section className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100">
