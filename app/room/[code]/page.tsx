@@ -29,7 +29,8 @@ export default function RoomPage() {
   useEffect(() => {
     if (!username) return;
     if (!clientSocket) {
-      clientSocket = io({ path: "/api/socket" });
+      const url = process.env.NEXT_PUBLIC_SOCKET_URL || "";
+      clientSocket = url ? io(url, { path: "/api/socket" }) : io({ path: "/api/socket" });
     }
     const s = clientSocket;
     const onUpdate = (snap: Snapshot) => {
