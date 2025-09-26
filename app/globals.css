@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ilmquest-bg: #fff5f9;
+  --ilmquest-surface: #ffe0eb;
+  --ilmquest-surface-strong: #ffc1d6;
+  --ilmquest-text-primary: #521a2f;
+  --ilmquest-text-muted: #8a4a61;
+  --ilmquest-accent: #ff6fa1;
+  --ilmquest-accent-strong: #ff2d7a;
+  --ilmquest-success: #2bb380;
+  --ilmquest-error: #ef4665;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --color-rose-950: #330919;
+  --color-rose-900: #51122b;
+  --color-rose-800: #6c1839;
+  --color-rose-700: #991f4f;
+  --color-rose-600: #c82368;
+  --color-rose-500: #ef2f86;
+  --color-rose-400: #ff6fa1;
+  --color-rose-300: #ff9fbe;
+  --color-rose-200: #ffc1d6;
+  --color-rose-100: #ffdbe7;
+  --color-rose-50: #fff5f9;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+ body {
+  background: var(--ilmquest-bg);
+  color: var(--ilmquest-text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.layout-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(255, 111, 161, 0.12) 0%, rgba(255, 221, 235, 0.24) 100%);
 }
