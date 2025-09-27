@@ -113,8 +113,9 @@ function rotateTurn(room: RoomRecord): string | null {
 export class RoomStore {
   private rooms = new Map<string, RoomRecord>();
 
-  createRoom(hostSocketId: string, hostName: string): RoomSnapshot {
-    const code = this.generateUnusedCode();
+  createRoom(hostSocketId: string, hostName: string, preferredCode?: string): RoomSnapshot {
+    const requested = (preferredCode || "").trim().toUpperCase();
+    const code = requested && !this.rooms.has(requested) ? requested : this.generateUnusedCode();
     const hostProfile: PlayerProfile = {
       id: hostSocketId,
       socketId: hostSocketId,

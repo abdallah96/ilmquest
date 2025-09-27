@@ -27,7 +27,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponseServerI
 
     io.on("connection", (socket) => {
       socket.on("room:create", ({ code, name }: { code: string; name: string }) => {
-        const snapshot = roomStore.createRoom(socket.id, name);
+        const snapshot = roomStore.createRoom(socket.id, name, code);
         socket.join(snapshot.code);
         io.to(snapshot.code).emit("room:update", snapshot);
       });
