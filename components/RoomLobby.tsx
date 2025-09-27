@@ -16,18 +16,17 @@ export default function RoomLobby({ code, players, isHost, onStart }: RoomLobbyP
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {players.map((p) => (
-          <div key={p.id} className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
-            <p className="text-xs text-rose-700/70">Joueur</p>
-            <p className="text-sm font-medium text-rose-800 truncate">{p.name}</p>
-          </div>
-        ))}
-        {players.length < 2 && (
-          <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
-            <p className="text-xs text-rose-700/70">Joueur</p>
-            <p className="text-sm font-medium text-rose-800">En attente…</p>
-          </div>
-        )}
+        {Array.from({ length: 4 }, (_, index) => {
+          const player = players[index];
+          return (
+            <div key={index} className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
+              <p className="text-xs text-rose-700/70">Joueur {index + 1}</p>
+              <p className="text-sm font-medium text-rose-800 truncate">
+                {player ? player.name : "En attente…"}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       <button

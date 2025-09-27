@@ -40,7 +40,8 @@ type RoomRecord = {
 
 const codeGenerator = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 5);
 
-const PLAYER_LIMIT = 2;
+const PLAYER_LIMIT = 4;
+const MIN_PLAYERS = 2;
 
 export type JoinOutcome =
   | { ok: true; snapshot: RoomSnapshot }
@@ -186,7 +187,7 @@ export class RoomStore {
         if (entry.data.turnId === removed.id) {
           entry.data.turnId = rotateTurn(entry);
         }
-        if (entry.data.phase === "active" && entry.data.players.length < PLAYER_LIMIT) {
+        if (entry.data.phase === "active" && entry.data.players.length < MIN_PLAYERS) {
           entry.data.phase = "ended";
           entry.data.turnId = null;
           entry.data.activeQuestion = null;
@@ -205,7 +206,7 @@ export class RoomStore {
     if (entry.data.hostId !== initiatorId) {
       return { ok: false, reason: "not-host" };
     }
-    if (entry.data.players.length < PLAYER_LIMIT) {
+    if (entry.data.players.length < MIN_PLAYERS) {
       return { ok: false, reason: "missing-players" };
     }
     entry.data.phase = "active";

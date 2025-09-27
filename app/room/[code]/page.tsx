@@ -111,7 +111,7 @@ export default function RoomPage() {
         <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100 text-center">
           <p className="text-sm text-rose-800">Partie terminée.</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            {(snapshot?.players ?? []).map((p) => (
+            {(snapshot?.players ?? []).map((p, index) => (
               <div key={p.id} className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
                 <p className="text-xs text-rose-700/70 truncate">{p.displayName}</p>
                 <p className="text-2xl font-semibold text-rose-800">{p.score}</p>
