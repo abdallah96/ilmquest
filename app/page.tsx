@@ -2,11 +2,19 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import WelcomeOverlay from "@/components/WelcomeOverlay";
 
 export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [showWelcome, setShowWelcome] = useState(() => {
+    try {
+      return window.localStorage.getItem("ilmquest_welcome_dismissed") !== "1";
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     try {
@@ -14,6 +22,8 @@ export default function Home() {
       if (saved) {
         setUsername(saved);
       }
+      const dismissed = window.localStorage.getItem("ilmquest_welcome_dismissed");
+      if (dismissed === "1") setShowWelcome(false);
     } catch {}
   }, []);
 
@@ -89,6 +99,15 @@ export default function Home() {
       </section>
 
       <p className="text-center text-xs text-rose-700/70 mt-6">Entrez votre prénom pour continuer</p>
+
+      {showWelcome && (
+        <WelcomeOverlay
+          onDismiss={() => {
+            setShowWelcome(false);
+            try { window.localStorage.setItem("ilmquest_welcome_dismissed", "1"); } catch {}
+          }}
+        />
+      )}
     </main>
   );
 }
