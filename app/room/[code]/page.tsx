@@ -83,6 +83,8 @@ export default function RoomPage() {
           players={(snapshot?.players ?? []).map((p) => ({ id: p.id, name: p.displayName }))}
           isHost={isHost}
           onStart={startGame}
+          selectedLevelIndex={snapshot?.selectedLevelIndex ?? null}
+          onSelectLevel={(levelIndex) => clientSocket?.emit("room:select-level", { code, levelIndex })}
         />
       ) : snapshot.phase === "active" ? (
         <QuestionCard

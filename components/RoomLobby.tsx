@@ -5,11 +5,29 @@ type RoomLobbyProps = {
   players: { id: string; name: string }[];
   isHost: boolean;
   onStart: () => void;
+  selectedLevelIndex?: number | null;
+  onSelectLevel?: (levelIndex: number) => void;
 };
 
-export default function RoomLobby({ code, players, isHost, onStart }: RoomLobbyProps) {
+export default function RoomLobby({ code, players, isHost, onStart, selectedLevelIndex = null, onSelectLevel }: RoomLobbyProps) {
   return (
     <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100">
+      <div className="mt-3">
+        <p className="text-sm font-medium text-rose-800 mb-2">Sélection du niveau</p>
+        <div className="grid grid-cols-5 gap-2">
+          {Array.from({ length: 25 }, (_, i) => (
+            <button
+              key={i}
+              disabled={!isHost}
+              onClick={() => onSelectLevel?.(i)}
+              className={`h-9 rounded-md text-xs border ${selectedLevelIndex === i ? "bg-rose-600 text-white border-rose-600" : "bg-rose-50 text-rose-800 border-rose-200"}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        {!isHost && <p className="text-[11px] text-rose-700/70 mt-1">En attente du choix de l’hôte…</p>}
+      </div>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-rose-700">Salle {code}</h2>
         <span className="text-xs text-rose-700/70">Partagez le code</span>
@@ -31,7 +49,7 @@ export default function RoomLobby({ code, players, isHost, onStart }: RoomLobbyP
 
       <button
         onClick={onStart}
-        disabled={!isHost || players.length < 2}
+        disabled={!isHost || players.length < 2 || selectedLevelIndex === null}
         className="mt-5 w-full h-11 rounded-lg bg-rose-500 text-white font-medium disabled:opacity-40"
       >
         Démarrer la partie

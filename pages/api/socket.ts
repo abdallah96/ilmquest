@@ -74,6 +74,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponseServerI
         io.to(code).emit("room:update", result.snapshot);
       });
 
+      socket.on("room:select-level", ({ code, levelIndex }: { code: string; levelIndex: number }) => {
+        const outcome = roomStore.selectLevel(code, socket.id, levelIndex);
+        if (!outcome.ok) {
+          socket.emit("room:error", outcome.reason);
+          return;
+        }
+        io.to(code).emit("room:update", outcome.snapshot);
+      });
+
       socket.on("room:snapshot", ({ code }: { code: string }) => {
         const snap = roomStore.snapshot(code);
         if (snap) {

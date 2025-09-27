@@ -31,11 +31,14 @@ export type RoomSnapshot = {
   questionInLevel: number; // 0..questionsPerLevel-1
   questionsPerLevel: number;
   lastAnswer: AnswerSnapshot | null;
+  selectedLevelIndex: number | null;
+  answeredCount: number;
 };
 
 type RoomRecord = {
   data: RoomSnapshot;
   levels: QuizQuestion[][]; // levels[levelIndex][questionInLevel]
+  answers: Map<string, number>; // playerId -> chosen option index for current question
 };
 
 const codeGenerator = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 5);
@@ -54,6 +57,10 @@ export type StartOutcome =
 export type AnswerOutcome =
   | { ok: true; snapshot: RoomSnapshot }
   | { ok: false; reason: "room-not-found" | "not-active" | "not-your-turn" | "unknown-player" };
+
+export type LevelSelectOutcome =
+  | { ok: true; snapshot: RoomSnapshot }
+  | { ok: false; reason: "room-not-found" | "not-host" | "invalid-level" };
 
 export type LeaveOutcome =
   | { code: string; snapshot: RoomSnapshot }
@@ -137,8 +144,11 @@ export class RoomStore {
         questionInLevel: 0,
         questionsPerLevel: DEFAULT_QUESTIONS_PER_LEVEL,
         lastAnswer: null,
+        selectedLevelIndex: null,
+        answeredCount: 0,
       },
       levels,
+      answers: new Map<string, number>(),
     };
     this.rooms.set(code, room);
     return room.data;
@@ -211,11 +221,13 @@ export class RoomStore {
       return { ok: false, reason: "missing-players" };
     }
     entry.data.phase = "active";
-    entry.data.levelIndex = 0;
+    entry.data.levelIndex = entry.data.selectedLevelIndex ?? 0;
     entry.data.questionInLevel = 0;
     entry.data.lastAnswer = null;
-    entry.data.turnId = entry.data.players[0]?.id || null;
-    entry.data.activeQuestion = entry.levels[0]?.[0] || null;
+    entry.data.turnId = null;
+    entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[0] || null;
+    entry.answers.clear();
+    entry.data.answeredCount = 0;
     entry.data.players = entry.data.players.map((player) => ({
       ...player,
       score: 0,
@@ -231,9 +243,6 @@ export class RoomStore {
     if (entry.data.phase !== "active") {
       return { ok: false, reason: "not-active" };
     }
-    if (entry.data.turnId !== playerId) {
-      return { ok: false, reason: "not-your-turn" };
-    }
     const playerExists = entry.data.players.some((player) => player.id === playerId);
     if (!playerExists) {
       return { ok: false, reason: "unknown-player" };
@@ -242,25 +251,31 @@ export class RoomStore {
     if (!currentQuestion) {
       return { ok: false, reason: "not-active" };
     }
-    const isCorrect = currentQuestion.answerIndex === optionIndex;
-    if (isCorrect) {
-      entry.data.players = entry.data.players.map((player) =>
-        player.id === playerId
-          ? {
-              ...player,
-              score: player.score + 1,
-            }
-          : player,
-      );
+    if (entry.answers.has(playerId)) {
+      return { ok: true, snapshot: entry.data };
+    }
+    entry.answers.set(playerId, optionIndex);
+    entry.data.answeredCount = entry.answers.size;
+    if (entry.answers.size < entry.data.players.length) {
+      return { ok: true, snapshot: entry.data };
+    }
+    for (const [pid, choice] of entry.answers.entries()) {
+      if (currentQuestion.answerIndex === choice) {
+        entry.data.players = entry.data.players.map((p) =>
+          p.id === pid ? { ...p, score: p.score + 1 } : p,
+        );
+      }
     }
     entry.data.lastAnswer = {
       playerId,
       questionId: currentQuestion.id,
       chosenIndex: optionIndex,
       correctIndex: currentQuestion.answerIndex,
-      isCorrect,
+      isCorrect: false,
     };
     const nextQuestionInLevel = entry.data.questionInLevel + 1;
+    entry.answers.clear();
+    entry.data.answeredCount = 0;
     if (nextQuestionInLevel >= entry.data.questionsPerLevel) {
       entry.data.phase = "level-complete";
       entry.data.turnId = null;
@@ -268,7 +283,7 @@ export class RoomStore {
       return { ok: true, snapshot: entry.data };
     }
     entry.data.questionInLevel = nextQuestionInLevel;
-    entry.data.turnId = rotateTurn(entry);
+    entry.data.turnId = null;
     entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[nextQuestionInLevel] ?? null;
     return { ok: true, snapshot: entry.data };
   }
@@ -294,8 +309,26 @@ export class RoomStore {
     entry.data.levelIndex = nextLevelIndex;
     entry.data.questionInLevel = 0;
     entry.data.phase = "active";
-    entry.data.turnId = rotateTurn(entry);
+    entry.data.turnId = null;
     entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[0] ?? null;
+    entry.answers.clear();
+    entry.data.answeredCount = 0;
+    return { ok: true, snapshot: entry.data };
+  }
+
+  selectLevel(code: string, initiatorId: string, levelIndex: number): LevelSelectOutcome {
+    const entry = this.rooms.get(code);
+    if (!entry) {
+      return { ok: false, reason: "room-not-found" };
+    }
+    if (entry.data.hostId !== initiatorId) {
+      return { ok: false, reason: "not-host" };
+    }
+    const maxIndex = entry.data.totalLevels - 1;
+    if (levelIndex < 0 || levelIndex > maxIndex) {
+      return { ok: false, reason: "invalid-level" };
+    }
+    entry.data.selectedLevelIndex = levelIndex;
     return { ok: true, snapshot: entry.data };
   }
 
