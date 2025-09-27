@@ -61,6 +61,15 @@ io.on("connection", (socket) => {
     io.to(code).emit("room:update", result.snapshot);
   });
 
+  socket.on("room:next-question", ({ code }: { code: string }) => {
+    const outcome = roomStore.nextQuestion(code, socket.id);
+    if (!outcome.ok) {
+      socket.emit("room:error", outcome.reason);
+      return;
+    }
+    io.to(code).emit("room:update", outcome.snapshot);
+  });
+
   socket.on("room:select-level", ({ code, levelIndex }: { code: string; levelIndex: number }) => {
     const outcome = roomStore.selectLevel(code, socket.id, levelIndex);
     if (!outcome.ok) {

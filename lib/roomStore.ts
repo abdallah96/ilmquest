@@ -19,6 +19,11 @@ export type AnswerSnapshot = {
   isCorrect: boolean;
 };
 
+export type RevealSnapshot = {
+  correctIndex: number;
+  choices: { playerId: string; chosenIndex: number }[];
+};
+
 export type RoomSnapshot = {
   code: string;
   phase: RoomPhase;
@@ -33,6 +38,7 @@ export type RoomSnapshot = {
   lastAnswer: AnswerSnapshot | null;
   selectedLevelIndex: number | null;
   answeredCount: number;
+  reveal: RevealSnapshot | null;
 };
 
 type RoomRecord = {
@@ -146,6 +152,7 @@ export class RoomStore {
         lastAnswer: null,
         selectedLevelIndex: null,
         answeredCount: 0,
+        reveal: null,
       },
       levels,
       answers: new Map<string, number>(),
@@ -259,13 +266,19 @@ export class RoomStore {
     if (entry.answers.size < entry.data.players.length) {
       return { ok: true, snapshot: entry.data };
     }
+    const choicesArray: { playerId: string; chosenIndex: number }[] = [];
     for (const [pid, choice] of entry.answers.entries()) {
+      choicesArray.push({ playerId: pid, chosenIndex: choice });
       if (currentQuestion.answerIndex === choice) {
         entry.data.players = entry.data.players.map((p) =>
           p.id === pid ? { ...p, score: p.score + 1 } : p,
         );
       }
     }
+    entry.data.reveal = {
+      correctIndex: currentQuestion.answerIndex,
+      choices: choicesArray,
+    };
     entry.data.lastAnswer = {
       playerId,
       questionId: currentQuestion.id,
@@ -273,18 +286,7 @@ export class RoomStore {
       correctIndex: currentQuestion.answerIndex,
       isCorrect: false,
     };
-    const nextQuestionInLevel = entry.data.questionInLevel + 1;
-    entry.answers.clear();
-    entry.data.answeredCount = 0;
-    if (nextQuestionInLevel >= entry.data.questionsPerLevel) {
-      entry.data.phase = "level-complete";
-      entry.data.turnId = null;
-      entry.data.activeQuestion = null;
-      return { ok: true, snapshot: entry.data };
-    }
-    entry.data.questionInLevel = nextQuestionInLevel;
-    entry.data.turnId = null;
-    entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[nextQuestionInLevel] ?? null;
+    // Stay on reveal until host advances
     return { ok: true, snapshot: entry.data };
   }
 
@@ -313,6 +315,33 @@ export class RoomStore {
     entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[0] ?? null;
     entry.answers.clear();
     entry.data.answeredCount = 0;
+    return { ok: true, snapshot: entry.data };
+  }
+
+  nextQuestion(code: string, initiatorId: string): StartOutcome {
+    const entry = this.rooms.get(code);
+    if (!entry) {
+      return { ok: false, reason: "room-not-found" };
+    }
+    if (entry.data.hostId !== initiatorId) {
+      return { ok: false, reason: "not-host" };
+    }
+    if (entry.data.phase !== "active") {
+      return { ok: false, reason: "not-host" };
+    }
+    const nextQuestionInLevel = entry.data.questionInLevel + 1;
+    entry.answers.clear();
+    entry.data.answeredCount = 0;
+    entry.data.reveal = null;
+    if (nextQuestionInLevel >= entry.data.questionsPerLevel) {
+      entry.data.phase = "level-complete";
+      entry.data.turnId = null;
+      entry.data.activeQuestion = null;
+      return { ok: true, snapshot: entry.data };
+    }
+    entry.data.questionInLevel = nextQuestionInLevel;
+    entry.data.turnId = null;
+    entry.data.activeQuestion = entry.levels[entry.data.levelIndex]?.[nextQuestionInLevel] ?? null;
     return { ok: true, snapshot: entry.data };
   }
 

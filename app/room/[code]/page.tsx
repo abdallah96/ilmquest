@@ -64,6 +64,13 @@ export default function RoomPage() {
     clientSocket?.emit("room:start", { code });
   }
 
+  const myChoice = useMemo(() => {
+    if (!snapshot) return null;
+    const myId = clientSocket?.id ?? "";
+    const chosen = snapshot.reveal?.choices?.find?.((c) => c.playerId === myId)?.chosenIndex;
+    return typeof chosen === "number" ? chosen : null;
+  }, [snapshot]);
+
   function submitAnswer(index: number) {
     clientSocket?.emit("room:answer", { code, optionIndex: index });
   }
@@ -87,14 +94,25 @@ export default function RoomPage() {
           onSelectLevel={(levelIndex) => clientSocket?.emit("room:select-level", { code, levelIndex })}
         />
       ) : snapshot.phase === "active" ? (
-        <QuestionCard
-          question={{
-            id: snapshot.activeQuestion?.id ?? "",
-            prompt: snapshot.activeQuestion?.prompt ?? "",
-            options: snapshot.activeQuestion?.options ?? [],
-          }}
-          onSelect={submitAnswer}
-        />
+        <>
+          <QuestionCard
+            question={{
+              id: snapshot.activeQuestion?.id ?? "",
+              prompt: snapshot.activeQuestion?.prompt ?? "",
+              options: snapshot.activeQuestion?.options ?? [],
+            }}
+            onSelect={submitAnswer}
+            reveal={snapshot.reveal ? { correctIndex: snapshot.reveal.correctIndex, chosenIndex: myChoice } : null}
+          />
+          {isHost && snapshot.reveal && (
+            <button
+              onClick={() => clientSocket?.emit("room:next-question", { code })}
+              className="mt-4 w-full h-11 rounded-lg bg-rose-600 text-white font-medium"
+            >
+              Question suivante
+            </button>
+          )}
+        </>
       ) : snapshot.phase === "level-complete" ? (
         <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100 text-center">
           <p className="text-sm text-rose-800">Niveau {snapshot.levelIndex + 1} terminé.</p>
