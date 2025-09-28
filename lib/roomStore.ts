@@ -86,6 +86,26 @@ function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function shuffleQuestion(question: QuizQuestion): QuizQuestion {
+  const correctAnswer = question.options[question.answerIndex];
+  const shuffledOptions = [...question.options];
+  
+  // Fisher-Yates shuffle
+  for (let i = shuffledOptions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+  }
+  
+  // Find new index of correct answer
+  const newAnswerIndex = shuffledOptions.indexOf(correctAnswer);
+  
+  return {
+    ...question,
+    options: shuffledOptions,
+    answerIndex: newAnswerIndex,
+  };
+}
+
 function buildLevels(totalLevels: number, questionsPerLevel: number): QuizQuestion[][] {
   const difficultiesPattern: QuizQuestion["difficulty"][] = [
     "easy",
@@ -97,11 +117,12 @@ function buildLevels(totalLevels: number, questionsPerLevel: number): QuizQuesti
   const levels: QuizQuestion[][] = [];
   for (let lvl = 0; lvl < totalLevels; lvl += 1) {
     const levelQuestions: QuizQuestion[] = [];
-    for (let idx = 0; idx < questionsPerLevel; idx += 1) {
-      const difficulty = difficultiesPattern[idx % difficultiesPattern.length];
-      const pool = questionBuckets[difficulty];
-      levelQuestions.push(pickRandom(pool));
-    }
+        for (let idx = 0; idx < questionsPerLevel; idx += 1) {
+          const difficulty = difficultiesPattern[idx % difficultiesPattern.length];
+          const pool = questionBuckets[difficulty];
+          const randomQuestion = pickRandom(pool);
+          levelQuestions.push(shuffleQuestion(randomQuestion));
+        }
     levels.push(levelQuestions);
   }
   return levels;

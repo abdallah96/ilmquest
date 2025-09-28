@@ -11,7 +11,7 @@ type RoomLobbyProps = {
 
 export default function RoomLobby({ code, players, isHost, onStart, selectedLevelIndex = null, onSelectLevel }: RoomLobbyProps) {
   return (
-    <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100">
+    <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-rose-100 transform transition-all duration-500 hover:shadow-xl">
       <div className="mt-3">
         <p className="text-sm font-medium text-rose-800 mb-2">Sélection du niveau</p>
         <div className="grid grid-cols-5 gap-2">
@@ -37,14 +37,32 @@ export default function RoomLobby({ code, players, isHost, onStart, selectedLeve
         <span className="text-xs text-rose-700/70">Partagez le code</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {Array.from({ length: 4 }, (_, index) => {
           const player = players[index];
           return (
-            <div key={index} className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
-              <p className="text-xs text-rose-700/70">Joueur {index + 1}</p>
-              <p className="text-sm font-medium text-rose-800 truncate">
-                {player ? player.name : "En attente…"}
+            <div 
+              key={index} 
+              className={`rounded-xl border-2 p-4 text-center transition-all duration-500 transform hover:scale-105 ${
+                player 
+                  ? "bg-gradient-to-br from-rose-50 to-rose-100 border-rose-300 shadow-md animate-fade-in" 
+                  : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 opacity-60"
+              }`}
+              style={{
+                animationDelay: `${index * 150}ms`,
+                animationFillMode: 'both'
+              }}
+            >
+              <p className="text-xs font-medium text-rose-700/80 mb-1">Joueur {index + 1}</p>
+              <p className="text-sm font-semibold text-rose-800 truncate">
+                {player ? (
+                  <span className="flex items-center justify-center">
+                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                    {player.name}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">En attente…</span>
+                )}
               </p>
             </div>
           );
@@ -54,9 +72,9 @@ export default function RoomLobby({ code, players, isHost, onStart, selectedLeve
       <button
         onClick={onStart}
         disabled={!isHost || players.length < 2 || selectedLevelIndex === null}
-        className="mt-5 w-full h-11 rounded-lg bg-rose-500 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+        className="mt-6 w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold text-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500"
       >
-        Démarrer la partie
+        {selectedLevelIndex !== null ? "Démarrer la partie" : "Sélectionnez un niveau"}
       </button>
     </div>
   );
