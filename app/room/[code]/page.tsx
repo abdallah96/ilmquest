@@ -17,7 +17,7 @@ export default function RoomPage() {
 
   const [username, setUsername] = useState("");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
-  // removed unused connecting state
+  const [myAnswer, setMyAnswer] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -37,6 +37,10 @@ export default function RoomPage() {
       setSnapshot(snap);
       if (snap.code && snap.code !== code) {
         router.replace(`/room/${snap.code}`);
+      }
+      // Reset answer when new question starts
+      if (snap.phase === "active" && !snap.reveal && snap.answeredCount === 0) {
+        setMyAnswer(null);
       }
     };
     const onError = (reason: string) => {
@@ -72,6 +76,8 @@ export default function RoomPage() {
   }, [snapshot]);
 
   function submitAnswer(index: number) {
+    if (myAnswer !== null) return; // Already answered
+    setMyAnswer(index);
     clientSocket?.emit("room:answer", { code, optionIndex: index });
   }
 
@@ -102,10 +108,11 @@ export default function RoomPage() {
               options: snapshot.activeQuestion?.options ?? [],
             }}
             onSelect={submitAnswer}
-            disabled={!!snapshot.reveal || myChoice !== null}
+            disabled={!!snapshot.reveal || myAnswer !== null}
             reveal={snapshot.reveal ? { correctIndex: snapshot.reveal.correctIndex, chosenIndex: myChoice } : null}
+            myAnswer={myAnswer}
           />
-          {myChoice !== null && !snapshot.reveal && (
+          {myAnswer !== null && !snapshot.reveal && (
             <p className="mt-3 text-center text-xs text-rose-700/70">
               En attente des autres joueurs ({snapshot.answeredCount}/{snapshot.players.length})…
             </p>
@@ -113,7 +120,7 @@ export default function RoomPage() {
           {isHost && snapshot.reveal && (
             <button
               onClick={() => clientSocket?.emit("room:next-question", { code })}
-              className="mt-4 w-full h-11 rounded-lg bg-rose-600 text-white font-medium"
+              className="mt-4 w-full h-11 rounded-lg bg-rose-600 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
             >
               Question suivante
             </button>
@@ -126,11 +133,14 @@ export default function RoomPage() {
             Score: {snapshot.players.map((p) => `${p.displayName}: ${p.score}`).join(" · ")}
           </p>
           {isHost ? (
-            <button onClick={() => clientSocket?.emit("room:next-level", { code })} className="mt-5 w-full h-11 rounded-lg bg-rose-600 text-white font-medium">
+            <button 
+              onClick={() => clientSocket?.emit("room:next-level", { code })} 
+              className="mt-5 w-full h-11 rounded-lg bg-rose-600 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+            >
               Démarrer le niveau suivant
             </button>
           ) : (
-            <p className="mt-4 text-xs text-rose-700/70">En attente de l’hôte…</p>
+            <p className="mt-4 text-xs text-rose-700/70">En attente de l&apos;hôte…</p>
           )}
         </div>
       ) : (

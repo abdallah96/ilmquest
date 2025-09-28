@@ -20,7 +20,11 @@ export default function RoomLobby({ code, players, isHost, onStart, selectedLeve
               key={i}
               disabled={!isHost}
               onClick={() => onSelectLevel?.(i)}
-              className={`h-9 rounded-md text-xs border ${selectedLevelIndex === i ? "bg-rose-600 text-white border-rose-600" : "bg-rose-50 text-rose-800 border-rose-200"}`}
+              className={`h-9 rounded-md text-xs border transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+                selectedLevelIndex === i 
+                  ? "bg-rose-600 text-white border-rose-600 shadow-md" 
+                  : "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100 hover:border-rose-300"
+              } ${!isHost ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
             >
               {i + 1}
             </button>
@@ -50,7 +54,7 @@ export default function RoomLobby({ code, players, isHost, onStart, selectedLeve
       <button
         onClick={onStart}
         disabled={!isHost || players.length < 2 || selectedLevelIndex === null}
-        className="mt-5 w-full h-11 rounded-lg bg-rose-500 text-white font-medium disabled:opacity-40"
+        className="mt-5 w-full h-11 rounded-lg bg-rose-500 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
       >
         Démarrer la partie
       </button>
