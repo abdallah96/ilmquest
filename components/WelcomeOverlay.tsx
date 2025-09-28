@@ -1,38 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   onDismiss: () => void;
 };
 
 export default function WelcomeOverlay({ onDismiss }: Props) {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+
+  const handleDismiss = () => {
+    setIsAnimatingOut(true);
+    setTimeout(() => {
+      onDismiss();
+    }, 700);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,#ffdbe7_0%,#fff5f9_60%,#fff5f9_100%)]">
-      <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-rose-200 bg-white/80 backdrop-blur shadow-sm p-6 text-center">
-          <div className="mx-auto h-16 w-16 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center animate-pulse">
-            <span className="text-2xl">🌙</span>
+    <div 
+      className={`fixed inset-0 z-50 flex items-center justify-center p-6 transition-all duration-700
+        bg-gradient-to-br from-rose-50/95 to-rose-100/95 backdrop-blur-md
+        ${isAnimatingOut ? "opacity-0" : "opacity-100"}`}
+    >
+      <div 
+        className={`w-full max-w-sm transform transition-all duration-700
+          ${isAnimatingOut ? "scale-90 opacity-0" : "scale-100 opacity-100"}`}
+      >
+        <div className="rounded-3xl border-2 border-rose-200 bg-white/95 backdrop-blur-sm shadow-2xl p-8 text-center animate-fade-in">
+          <div className="mb-6">
+            <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shadow-xl animate-bounce-in">
+              <span className="text-3xl text-white">🕌</span>
+            </div>
           </div>
-          <h2 className="mt-4 text-2xl font-semibold text-rose-700">Bienvenue</h2>
-          <p className="mt-1 text-sm text-rose-700/80">IlmQuest – Quiz islamique multijoueur</p>
+          
+          <h2 className="text-3xl font-bold text-rose-700 mb-3 animate-fade-in" style={{animationDelay: '200ms', animationFillMode: 'both'}}>
+            Bienvenue à IlmQuest !
+          </h2>
+          
+          <p className="text-sm text-rose-700/80 mb-6 leading-relaxed animate-fade-in" style={{animationDelay: '400ms', animationFillMode: 'both'}}>
+            Quiz islamique multijoueur – Testez vos connaissances avec vos amis !
+          </p>
+          
+          <div className="space-y-2 mb-6 animate-fade-in" style={{animationDelay: '600ms', animationFillMode: 'both'}}>
+            <div className="flex items-center justify-center text-xs text-rose-700">
+              <span className="mr-2">🎯</span> 25 niveaux • 5 questions chacun
+            </div>
+            <div className="flex items-center justify-center text-xs text-rose-700">
+              <span className="mr-2">👥</span> Jusqu&apos;à 4 joueurs simultanément
+            </div>
+            <div className="flex items-center justify-center text-xs text-rose-700">
+              <span className="mr-2">🏆</span> Difficulté croissante
+            </div>
+          </div>
+          
           <button
-            onClick={onDismiss}
-            className="mt-5 w-full h-11 rounded-lg bg-rose-600 text-white font-medium active:scale-[0.99] transition"
+            onClick={handleDismiss}
+            className="w-full h-12 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] animate-bounce-in"
+            style={{animationDelay: '800ms', animationFillMode: 'both'}}
           >
-            Bismillah, commencer
+            ✨ Bismillah, commencer
           </button>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-2 text-rose-700/70 text-xs">
-          <div className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-bounce" />
-          <div className="h-1.5 w-1.5 rounded-full bg-rose-300 animate-bounce [animation-delay:120ms]" />
-          <div className="h-1.5 w-1.5 rounded-full bg-rose-200 animate-bounce [animation-delay:240ms]" />
+        
+        <div className="mt-4 flex items-center justify-center gap-2 animate-fade-in" style={{animationDelay: '1000ms', animationFillMode: 'both'}}>
+          <div className="h-2 w-2 rounded-full bg-rose-400 animate-pulse" />
+          <div className="h-2 w-2 rounded-full bg-rose-300 animate-pulse" style={{animationDelay: '200ms'}} />
+          <div className="h-2 w-2 rounded-full bg-rose-200 animate-pulse" style={{animationDelay: '400ms'}} />
         </div>
       </div>
     </div>

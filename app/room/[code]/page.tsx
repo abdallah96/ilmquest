@@ -127,21 +127,38 @@ export default function RoomPage() {
           )}
         </>
       ) : snapshot.phase === "level-complete" ? (
-        <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100 text-center">
-          <p className="text-sm text-rose-800">Niveau {snapshot.levelIndex + 1} terminé.</p>
-          <p className="text-xs text-rose-700/70 mt-1">
-            Score: {snapshot.players.map((p) => `${p.displayName}: ${p.score}`).join(" · ")}
-          </p>
-          {isHost ? (
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-rose-100 text-center animate-fade-in">
+          <div className="mb-4">
+            <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full flex items-center justify-center animate-bounce-in">
+              <span className="text-2xl text-white">🎉</span>
+            </div>
+            <h3 className="text-xl font-bold text-rose-800 mb-2">Niveau {snapshot.levelIndex + 1} terminé !</h3>
+            <p className="text-sm text-rose-700/80">
+              Score: {snapshot.players.map((p) => `${p.displayName}: ${p.score}`).join(" · ")}
+            </p>
+          </div>
+          
+          <div className="space-y-3">
+            {isHost && snapshot.levelIndex < snapshot.totalLevels - 1 && (
+              <button 
+                onClick={() => clientSocket?.emit("room:next-level", { code })} 
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+              >
+                Démarrer le niveau suivant
+              </button>
+            )}
+            
             <button 
-              onClick={() => clientSocket?.emit("room:next-level", { code })} 
-              className="mt-5 w-full h-11 rounded-lg bg-rose-600 text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+              onClick={() => router.push("/")} 
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-gray-500 to-gray-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
             >
-              Démarrer le niveau suivant
+              Retour au menu principal
             </button>
-          ) : (
-            <p className="mt-4 text-xs text-rose-700/70">En attente de l&apos;hôte…</p>
-          )}
+            
+            {!isHost && snapshot.levelIndex < snapshot.totalLevels - 1 && (
+              <p className="text-xs text-rose-700/70 mt-2">En attente de l&apos;hôte…</p>
+            )}
+          </div>
         </div>
       ) : (
         <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100 text-center">
