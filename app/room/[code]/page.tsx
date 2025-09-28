@@ -102,8 +102,14 @@ export default function RoomPage() {
               options: snapshot.activeQuestion?.options ?? [],
             }}
             onSelect={submitAnswer}
+            disabled={!!snapshot.reveal || myChoice !== null}
             reveal={snapshot.reveal ? { correctIndex: snapshot.reveal.correctIndex, chosenIndex: myChoice } : null}
           />
+          {myChoice !== null && !snapshot.reveal && (
+            <p className="mt-3 text-center text-xs text-rose-700/70">
+              En attente des autres joueurs ({snapshot.answeredCount}/{snapshot.players.length})…
+            </p>
+          )}
           {isHost && snapshot.reveal && (
             <button
               onClick={() => clientSocket?.emit("room:next-question", { code })}
