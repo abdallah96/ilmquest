@@ -161,15 +161,93 @@ export default function RoomPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-white/80 backdrop-blur rounded-xl p-5 shadow-sm border border-rose-100 text-center">
-          <p className="text-sm text-rose-800">Partie terminée.</p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            {(snapshot?.players ?? []).map((p, index) => (
-              <div key={p.id} className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-center">
-                <p className="text-xs text-rose-700/70 truncate">{p.displayName}</p>
-                <p className="text-2xl font-semibold text-rose-800">{p.score}</p>
-              </div>
-            ))}
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-rose-100 text-center animate-fade-in">
+          <div className="mb-6">
+            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-xl animate-bounce-in">
+              <span className="text-3xl text-white">🏆</span>
+            </div>
+            <h3 className="text-2xl font-bold text-rose-800 mb-2">Partie terminée !</h3>
+            <p className="text-sm text-rose-700/80">Félicitations à tous les participants</p>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            {(snapshot?.players ?? [])
+              .sort((a, b) => b.score - a.score)
+              .map((player, index) => {
+                const isWinner = index === 0;
+                const isSecond = index === 1;
+                const isThird = index === 2;
+                
+                return (
+                  <div
+                    key={player.id}
+                    className={`relative rounded-2xl p-4 transition-all duration-500 transform hover:scale-[1.02] animate-fade-in ${
+                      isWinner
+                        ? "bg-gradient-to-r from-yellow-50 to-yellow-100 border-2 border-yellow-400 shadow-lg"
+                        : isSecond
+                        ? "bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-400 shadow-md"
+                        : isThird
+                        ? "bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-400 shadow-md"
+                        : "bg-gradient-to-r from-rose-50 to-rose-100 border-2 border-rose-300 shadow-sm"
+                    }`}
+                    style={{
+                      animationDelay: `${index * 200}ms`,
+                      animationFillMode: 'both'
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-md ${
+                          isWinner
+                            ? "bg-gradient-to-br from-yellow-400 to-yellow-600"
+                            : isSecond
+                            ? "bg-gradient-to-br from-gray-400 to-gray-600"
+                            : isThird
+                            ? "bg-gradient-to-br from-orange-400 to-orange-600"
+                            : "bg-gradient-to-br from-rose-400 to-rose-600"
+                        }`}>
+                          {isWinner ? "🥇" : isSecond ? "🥈" : isThird ? "🥉" : `${index + 1}`}
+                        </div>
+                        <div className="text-left">
+                          <p className={`font-semibold truncate ${
+                            isWinner ? "text-yellow-800" : isSecond ? "text-gray-800" : isThird ? "text-orange-800" : "text-rose-800"
+                          }`}>
+                            {player.displayName}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {index === 0 ? "Champion" : index === 1 ? "Vice-champion" : index === 2 ? "Troisième place" : `${index + 1}ème place`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${
+                          isWinner ? "text-yellow-800" : isSecond ? "text-gray-800" : isThird ? "text-orange-800" : "text-rose-800"
+                        }`}>
+                          {player.score}
+                        </p>
+                        <p className="text-xs text-gray-600">points</p>
+                      </div>
+                    </div>
+                    
+                    {isWinner && (
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                        <span className="text-white text-sm">👑</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push("/")}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold shadow-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+            >
+              🏠 Retour au menu principal
+            </button>
+            
+            <p className="text-xs text-rose-700/70">Merci d&apos;avoir joué à IlmQuest !</p>
           </div>
         </div>
       )}
