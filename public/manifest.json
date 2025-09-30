@@ -1,0 +1,35 @@
+{
+  "name": "IlmQuest - Quiz Islamique Multijoueur",
+  "short_name": "IlmQuest",
+  "description": "Quiz islamique multijoueur mobile - Testez vos connaissances avec vos amis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff5f9",
+  "theme_color": "#be185d",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "/mosque-logo.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mosque-logo.svg",
+      "sizes": "512x512", 
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/mosque-logo.svg",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
